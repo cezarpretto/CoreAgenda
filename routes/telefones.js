@@ -64,17 +64,20 @@ router.post('/', function(req, res, next){
       console.error(err);
       return res.status(500).json({success: false, data: err});
     }
+    try {
+      client.query('insert into telefones (nome, telefone, endereco) values ($1, $2, $3)', [data.nome, data.telefone, data.endereco]);
+      var query = client.query("select id, nome, telefone, endereco from telefones");
+      query.on('row', function(row){
+        results.push(row);
+      });
 
-    client.query('insert into telefones (nome, telefone, endereco) values ($1, $2, $3)', [data.nome, data.telefone, data.endereco]);
-    var query = client.query("select id, nome, telefone, endereco from telefones");
-    query.on('row', function(row){
-      results.push(row);
-    });
-
-    query.on('end', function(){
-      done();
-      return res.json(results);
-    });
+      query.on('end', function(){
+        done();
+        return res.json(results);
+      });
+    } catch (e) {
+      console.log(e);
+    }
   });
 });
 
